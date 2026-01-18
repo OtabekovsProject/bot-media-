@@ -4,3 +4,5 @@ shazamio
 aiosqlite
 python-dotenv
 ffmpeg-python
+aiohttp
+pyaudioop

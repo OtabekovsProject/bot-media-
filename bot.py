@@ -522,24 +522,57 @@ async def error_handler(event, exception):
     return True  # Prevent crash
 
 # --- START BOT ---
-async def main():
-    try:
-        if not os.path.exists(DOWNLOAD_PATH): os.makedirs(DOWNLOAD_PATH)
-        await init_db()
-        await bot.delete_webhook(drop_pending_updates=True)
-        print("🤖 Bot ishga tushdi...")
-        await dp.start_polling(bot)
-    except Exception as e:
-        logging.error(f"Bot error: {e}")
-        await asyncio.sleep(5)
-        await main()  # Auto-restart
+async def on_startup(app):
+    """Called when webhook server starts"""
+    await init_db()
+    if not os.path.exists(DOWNLOAD_PATH): os.makedirs(DOWNLOAD_PATH)
+    
+    # Set webhook URL from environment
+    webhook_url = os.getenv("WEBHOOK_URL", "")
+    if webhook_url:
+        await bot.set_webhook(f"{webhook_url}{WEBHOOK_PATH}")
+        print(f"🤖 Bot ishga tushdi (webhook mode)")
+    else:
+        print("🤖 Bot ishga tushdi (polling mode)")
+
+async def on_shutdown(app):
+    """Called when webhook server stops"""
+    await bot.delete_webhook()
+
+def run_webhook():
+    """Run bot in webhook mode (for Render/Production)"""
+    app = web.Application()
+    
+    # Setup webhook handler
+    webhook_handler = SimpleRequestHandler(dispatcher=dp, bot=bot)
+    webhook_handler.register(app, path=WEBHOOK_PATH)
+    setup_application(app, dp, bot=bot)
+    
+    app.on_startup.append(on_startup)
+    app.on_shutdown.append(on_shutdown)
+    
+    # Run web server
+    web.run_app(app, host="0.0.0.0", port=WEBHOOK_PORT)
+
+async def run_polling():
+    """Run bot in polling mode (for local development)"""
+    if not os.path.exists(DOWNLOAD_PATH): os.makedirs(DOWNLOAD_PATH)
+    await init_db()
+    await bot.delete_webhook(drop_pending_updates=True)
+    print("🤖 Bot ishga tushdi (polling mode)")
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    while True:
-        try:
-            asyncio.run(main())
-        except KeyboardInterrupt:
-            break
-        except Exception as e:
-            logging.error(f"Critical error: {e}")
-            continue  # Auto-restart on any crash
+    # Check if running on Render (has PORT env variable)
+    if os.getenv("RENDER") or os.getenv("WEBHOOK_URL"):
+        run_webhook()
+    else:
+        # Local development - use polling
+        while True:
+            try:
+                asyncio.run(run_polling())
+            except KeyboardInterrupt:
+                break
+            except Exception as e:
+                logging.error(f"Error: {e}")
+                continue
