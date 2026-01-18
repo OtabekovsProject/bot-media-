@@ -1,0 +1,50 @@
+# Environment
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# Downloads
+downloads/
+*.mp4
+*.mp3
+*.m4a
+*.webm
+*.jpg
+*.png
+*.tmp
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cookies
+cookies.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp files
+*.bak
+*.backup

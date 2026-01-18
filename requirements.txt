@@ -1,0 +1,6 @@
+aiogram
+yt-dlp
+shazamio
+aiosqlite
+python-dotenv
+ffmpeg-python
