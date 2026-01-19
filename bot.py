@@ -1,7 +1,21 @@
 import os
+import sys
 import asyncio
 import logging
 import re
+
+# --- PYTHON 3.13 FIX (pydub/audioop) ---
+# Python 3.13 da audioop moduli olib tashlangan.
+# Pydub va ShazamIO ishlashi uchun pyaudioop ni audioop sifatida tanitamiz.
+try:
+    import audioop
+except ImportError:
+    try:
+        import pyaudioop
+        sys.modules['audioop'] = pyaudioop
+    except ImportError:
+        print("Warning: pyaudioop not found! Please install it: pip install pyaudioop")
+
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from aiogram.types import FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
