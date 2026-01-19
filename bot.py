@@ -531,13 +531,17 @@ async def on_startup(app):
     webhook_url = os.getenv("WEBHOOK_URL", "")
     if webhook_url:
         await bot.set_webhook(f"{webhook_url}{WEBHOOK_PATH}")
-        print(f"🤖 Bot ishga tushdi (webhook mode)")
+        print(f"🤖 Bot ishga tushdi (webhook mode): {webhook_url}")
     else:
-        print("🤖 Bot ishga tushdi (polling mode)")
+        print("⚠️ WEBHOOK_URL topilmadi!")
 
 async def on_shutdown(app):
     """Called when webhook server stops"""
     await bot.delete_webhook()
+
+async def root_handler(request):
+    """Simple check to see if bot is running"""
+    return web.Response(text="🤖 TopTuneX Bot is running!", status=200)
 
 def run_webhook():
     """Run bot in webhook mode (for Render/Production)"""
@@ -547,6 +551,9 @@ def run_webhook():
     webhook_handler = SimpleRequestHandler(dispatcher=dp, bot=bot)
     webhook_handler.register(app, path=WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
+    
+    # Add root route for checking status
+    app.router.add_get('/', root_handler)
     
     app.on_startup.append(on_startup)
     app.on_shutdown.append(on_shutdown)
