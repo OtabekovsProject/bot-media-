@@ -528,7 +528,7 @@ async def on_startup(app):
     if not os.path.exists(DOWNLOAD_PATH): os.makedirs(DOWNLOAD_PATH)
     
     # Set webhook URL from environment
-    webhook_url = os.getenv("WEBHOOK_URL", "")
+    webhook_url = os.getenv("WEBHOOK_URL", "").rstrip("/")
     if webhook_url:
         await bot.set_webhook(f"{webhook_url}{WEBHOOK_PATH}")
         print(f"🤖 Bot ishga tushdi (webhook mode): {webhook_url}")
