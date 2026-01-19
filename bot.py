@@ -543,11 +543,15 @@ async def root_handler(request):
     """Check bot status and webhook info"""
     try:
         webhook_info = await bot.get_webhook_info()
+        env_url = os.getenv("WEBHOOK_URL", "NOT SET")
+        
         info_text = (
             f"🤖 <b>TopTuneX Bot is running!</b><br>"
             f"Unique ID: {bot.id}<br>"
-            f"Webhook URL: {webhook_info.url}<br>"
-            f"Pension updates: {webhook_info.pending_update_count}<br>"
+            f"<b>DEBUG INFO:</b><br>"
+            f"Render Env Var (WEBHOOK_URL): {env_url}<br>"
+            f"Telegram Webhook URL: {webhook_info.url}<br>"
+            f"Pending updates: {webhook_info.pending_update_count}<br>"
             f"Last error: {webhook_info.last_error_message}"
         )
         return web.Response(text=info_text, content_type='text/html')
