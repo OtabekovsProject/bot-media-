@@ -540,8 +540,19 @@ async def on_shutdown(app):
     await bot.delete_webhook()
 
 async def root_handler(request):
-    """Simple check to see if bot is running"""
-    return web.Response(text="🤖 TopTuneX Bot is running!", status=200)
+    """Check bot status and webhook info"""
+    try:
+        webhook_info = await bot.get_webhook_info()
+        info_text = (
+            f"🤖 <b>TopTuneX Bot is running!</b><br>"
+            f"Unique ID: {bot.id}<br>"
+            f"Webhook URL: {webhook_info.url}<br>"
+            f"Pension updates: {webhook_info.pending_update_count}<br>"
+            f"Last error: {webhook_info.last_error_message}"
+        )
+        return web.Response(text=info_text, content_type='text/html')
+    except Exception as e:
+        return web.Response(text=f"Bot running, but failed to get webhook info: {e}", status=500)
 
 def run_webhook():
     """Run bot in webhook mode (for Render/Production)"""
